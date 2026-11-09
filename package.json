@@ -1,0 +1,23 @@
+{
+  "name": "arquify_cocina_cnc_exporter",
+  "version": "1.0.0",
+  "description": "Microservicio de Exportación DXF / G-Code CNC Industrial para Muebles Arquify",
+  "main": "server.ts",
+  "type": "module",
+  "scripts": {
+    "start": "tsx server.ts",
+    "dev": "tsx watch server.ts"
+  },
+  "dependencies": {
+    "express": "^4.19.2",
+    "cors": "^2.8.5",
+    "jszip": "^3.10.1",
+    "tsx": "^4.19.0",
+    "typescript": "^5.5.3"
+  },
+  "devDependencies": {
+    "@types/express": "^4.17.21",
+    "@types/cors": "^2.8.17",
+    "@types/node": "^20.14.10"
+  }
+}
