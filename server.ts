@@ -3,6 +3,7 @@ import cors from 'cors';
 import JSZip from 'jszip';
 import { generatePartDxf } from './src/utils/kitchenCncDxf.js';
 import type { CncMachinedPart } from './src/utils/kitchenCncMachining.js';
+import { validateCncPart } from './src/utils/cncValidation.js';
 
 const app = express();
 const PORT = process.env.PORT || 3003;
@@ -16,9 +17,14 @@ app.get('/health', (_req, res) => {
 
 app.post('/api/cnc/export-dxf', (req, res) => {
   try {
-    const { part } = req.body;
-    if (!part) {
-      return res.status(400).json({ error: 'Objeto part es requerido' });
+    const { part } = req.body ?? {};
+    const validationError = validateCncPart(part);
+
+    if (validationError) {
+      return res.status(422).json({
+        success: false,
+        error: validationError
+      });
     }
     const dxfString = generatePartDxf(part);
     res.setHeader('Content-Type', 'application/dxf');
@@ -32,9 +38,25 @@ app.post('/api/cnc/export-dxf', (req, res) => {
 
 app.post('/api/cnc/export-dxf-zip', async (req, res) => {
   try {
-    const { parts } = req.body;
-    if (!parts || !Array.isArray(parts)) {
-      return res.status(400).json({ error: 'Array de piezas (parts) es requerido' });
+    const { parts } = req.body ?? {};
+
+    if (!Array.isArray(parts) || parts.length === 0 || parts.length > 200) {
+      return res.status(400).json({
+        success: false,
+        error: 'Se requiere entre 1 y 200 piezas'
+      });
+    }
+
+    for (const [index, part] of parts.entries()) {
+      const error = validateCncPart(part);
+
+      if (error) {
+        return res.status(422).json({
+          success: false,
+          partIndex: index,
+          error
+        });
+      }
     }
     const zip = new JSZip();
     parts.forEach((part: CncMachinedPart, index: number) => {
