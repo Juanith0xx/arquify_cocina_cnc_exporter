@@ -1,3 +1,4 @@
+import { applyHingePlateOrientation } from '../src/services/cncHingePlateOrientation.js';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 
@@ -284,3 +285,84 @@ test('rechaza laterales sin identidad estructural BOM', () => {
     /Falta identidad estructural/
   );
 });
+
+
+// Validación de selección de contraplacas para una puerta.
+for (const hingeSide of ['left', 'right'] as const) {
+  test(`conserva contraplacas solo en lateral ${hingeSide}`, () => {
+    const configuredOrientation = {
+      ...orientation,
+      doors: orientation.doors.map(door => ({
+        ...door,
+        hingeSide
+      }))
+    };
+
+    const result = applyHingePlateOrientation(
+      physical,
+      configuredOrientation,
+      cabinet
+    );
+
+    const findSide = (
+      parts: typeof physical,
+      side: 'left' | 'right'
+    ) => {
+      const found = parts.find(
+        item =>
+          item.physicalIdentity?.role === 'STRUCTURAL_SIDE' &&
+          item.physicalIdentity.side === side
+      );
+
+      assert.ok(found);
+      return found;
+    };
+
+    const oppositeSide =
+      hingeSide === 'left' ? 'right' : 'left';
+
+    const originalHinged = findSide(physical, hingeSide);
+    const originalOpposite = findSide(physical, oppositeSide);
+
+    const resultHinged = findSide(result, hingeSide);
+    const resultOpposite = findSide(result, oppositeSide);
+
+    const countPlates = (item: typeof originalHinged) =>
+      item.cnc.drills.filter(
+        drill => drill.type === 'hinge_plate_5'
+      ).length;
+
+    assert.ok(countPlates(originalHinged) > 0);
+    assert.ok(countPlates(originalOpposite) > 0);
+
+    // Se mantienen las operaciones del lateral de bisagras.
+    assert.deepEqual(
+      resultHinged.cnc,
+      originalHinged.cnc
+    );
+
+    // Se eliminan exclusivamente las contraplacas opuestas.
+    assert.equal(countPlates(resultOpposite), 0);
+
+    assert.equal(
+      resultOpposite.cnc.drills.length,
+      originalOpposite.cnc.drills.length -
+        countPlates(originalOpposite)
+    );
+
+    // Ranuras y destajes permanecen intactos.
+    assert.deepEqual(
+      resultOpposite.cnc.grooves,
+      originalOpposite.cnc.grooves
+    );
+
+    assert.deepEqual(
+      resultOpposite.cnc.pockets,
+      originalOpposite.cnc.pockets
+    );
+
+    // La operación no altera las piezas de entrada.
+    assert.ok(countPlates(originalOpposite) > 0);
+    assert.equal(result.length, physical.length);
+  });
+}
