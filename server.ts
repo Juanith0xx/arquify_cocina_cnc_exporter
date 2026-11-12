@@ -4,6 +4,7 @@ import JSZip from 'jszip';
 import { generatePartDxf } from './src/utils/kitchenCncDxf.js';
 import type { CncMachinedPart } from './src/utils/kitchenCncMachining.js';
 import { validateCncPart } from './src/utils/cncValidation.js';
+import { buildCncPlanPreview } from './src/services/cncPlanPreview.js';
 
 const app = express();
 const PORT = process.env.PORT || 3003;
@@ -73,6 +74,30 @@ app.post('/api/cnc/export-dxf-zip', async (req, res) => {
   } catch (err: any) {
     console.error('Error generando ZIP DXF:', err);
     return res.status(500).json({ error: err.message || 'Error interno en generador ZIP CNC' });
+  }
+});
+
+
+/**
+ * Previsualización estructurada.
+ * No genera DXF ni archivos para maquinaria.
+ */
+app.post('/api/cnc/plan-preview', (req, res) => {
+  try {
+    const preview = buildCncPlanPreview(req.body);
+    return res.status(200).json({
+      success: true,
+      ...preview
+    });
+  } catch (err: unknown) {
+    const message =
+      err instanceof Error ? err.message : 'Solicitud inválida';
+
+    return res.status(422).json({
+      success: false,
+      readiness: 'NOT_MACHINE_READY',
+      error: message
+    });
   }
 });
 

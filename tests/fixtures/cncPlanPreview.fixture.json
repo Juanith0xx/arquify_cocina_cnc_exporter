@@ -1,0 +1,205 @@
+{
+  "parts": [
+    {
+      "name": "Lateral (Cab 1 base)",
+      "moduleId": "mueble-1",
+      "moduleIndex": 0,
+      "qty": 2,
+      "physicalUnits": [
+        {
+          "unit": 1,
+          "role": "STRUCTURAL_SIDE",
+          "side": "left"
+        },
+        {
+          "unit": 2,
+          "role": "STRUCTURAL_SIDE",
+          "side": "right"
+        }
+      ],
+      "length": 800,
+      "width": 562,
+      "thickness": 18,
+      "material": "#FFFFFF",
+      "edgeL1": true,
+      "edgeL2": false,
+      "edgeW1": true,
+      "edgeW2": true,
+      "notes": "Laterales del gabinete",
+      "materialCategory": "structure",
+      "isHpl": false
+    },
+    {
+      "name": "Piso (Cab 1 base)",
+      "moduleId": "mueble-1",
+      "moduleIndex": 0,
+      "qty": 1,
+      "length": 564,
+      "width": 562,
+      "thickness": 18,
+      "material": "#FFFFFF",
+      "edgeL1": true,
+      "edgeL2": false,
+      "edgeW1": false,
+      "edgeW2": false,
+      "notes": "Piso del gabinete",
+      "materialCategory": "structure",
+      "isHpl": false
+    },
+    {
+      "name": "Barra Frontal Superior (Cab 1 base)",
+      "moduleId": "mueble-1",
+      "moduleIndex": 0,
+      "qty": 1,
+      "length": 564,
+      "width": 100,
+      "thickness": 18,
+      "material": "#FFFFFF",
+      "edgeL1": true,
+      "edgeL2": false,
+      "edgeW1": false,
+      "edgeW2": false,
+      "materialCategory": "structure",
+      "isHpl": false
+    },
+    {
+      "name": "Barra Refuerzo Trasera Superior (Cab 1 base)",
+      "moduleId": "mueble-1",
+      "moduleIndex": 0,
+      "qty": 1,
+      "length": 564,
+      "width": 100,
+      "thickness": 18,
+      "material": "#FFFFFF",
+      "edgeL1": true,
+      "edgeL2": false,
+      "edgeW1": false,
+      "edgeW2": false,
+      "notes": "Amarre posterior de refuerzo para trasera Durolac (superior)",
+      "materialCategory": "backs",
+      "isHpl": false
+    },
+    {
+      "name": "Barra Refuerzo Trasera Inferior (Cab 1 base)",
+      "moduleId": "mueble-1",
+      "moduleIndex": 0,
+      "qty": 1,
+      "length": 564,
+      "width": 100,
+      "thickness": 18,
+      "material": "#FFFFFF",
+      "edgeL1": true,
+      "edgeL2": false,
+      "edgeW1": false,
+      "edgeW2": false,
+      "notes": "Amarre posterior de refuerzo para trasera Durolac (inferior)",
+      "materialCategory": "backs",
+      "isHpl": false
+    },
+    {
+      "name": "Fondo Trasera (Cab 1 base)",
+      "moduleId": "mueble-1",
+      "moduleIndex": 0,
+      "qty": 1,
+      "length": 564,
+      "width": 782,
+      "thickness": 3,
+      "material": "Durolac Blanco 3mm",
+      "edgeL1": false,
+      "edgeL2": false,
+      "edgeW1": false,
+      "edgeW2": false,
+      "notes": "Placa Durolac 3mm ranurada/clavada",
+      "materialCategory": "backs",
+      "isHpl": false
+    },
+    {
+      "name": "Repisa (Cab 1 base)",
+      "moduleId": "mueble-1",
+      "moduleIndex": 0,
+      "qty": 1,
+      "length": 562,
+      "width": 520,
+      "thickness": 18,
+      "material": "#FFFFFF",
+      "edgeL1": true,
+      "edgeL2": false,
+      "edgeW1": false,
+      "edgeW2": false,
+      "notes": "1 repisa(s) interior(es) regulable(s)",
+      "materialCategory": "structure",
+      "isHpl": false
+    },
+    {
+      "name": "Puerta Frontal (Cab 1 base)",
+      "moduleId": "mueble-1",
+      "moduleIndex": 0,
+      "qty": 1,
+      "length": 794,
+      "width": 594,
+      "thickness": 18,
+      "material": "#FFFFFF",
+      "edgeL1": true,
+      "edgeL2": true,
+      "edgeW1": true,
+      "edgeW2": true,
+      "notes": "Puerta batiente",
+      "materialCategory": "doors",
+      "isHpl": false
+    }
+  ],
+  "cabinets": [
+    {
+      "id": "mueble-1",
+      "type": "base",
+      "variant": "1_door",
+      "width": 60,
+      "height": 90,
+      "depth": 58,
+      "position": [
+        0,
+        0,
+        0
+      ],
+      "rotation": 0,
+      "color": "#FFFFFF",
+      "hasDoors": true
+    }
+  ],
+  "settings": {
+    "hardwareBrand": "Provelcar",
+    "assemblyType": "spax",
+    "golaSystem": "none"
+  },
+  "orientations": [
+    {
+      "cabinetId": "mueble-1",
+      "doorLeaves": 1,
+      "sides": [
+        {
+          "role": "STRUCTURAL_SIDE",
+          "sourceBomIndex": 0,
+          "physicalUnit": 1,
+          "side": "left",
+          "innerFace": "face_A"
+        },
+        {
+          "role": "STRUCTURAL_SIDE",
+          "sourceBomIndex": 0,
+          "physicalUnit": 2,
+          "side": "right",
+          "innerFace": "face_A"
+        }
+      ],
+      "doors": [
+        {
+          "role": "DOOR_LEAF",
+          "sourceBomIndex": 7,
+          "physicalUnit": 1,
+          "hingeSide": "left",
+          "innerFace": "face_A"
+        }
+      ]
+    }
+  ]
+}
