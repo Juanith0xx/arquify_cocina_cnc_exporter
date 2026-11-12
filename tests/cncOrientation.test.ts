@@ -1,0 +1,247 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+
+import {
+  preparePhysicalCncParts
+} from '../src/services/cncPhysicalParts.js';
+
+import {
+  validateStandardCabinetOrientation
+} from '../src/services/validateCncOrientation.js';
+
+import type {
+  CabinetType,
+  Part
+} from '../src/types/cncInputs.js';
+
+import type {
+  CncCabinetOrientation
+} from '../src/types/cncOrientation.js';
+
+const cabinet: CabinetType = {
+  id: 'MOD-001',
+  type: 'base',
+  variant: '1_door',
+  width: 60,
+  height: 90,
+  depth: 58,
+  hasDoors: true
+};
+
+const lateral: Part = {
+  moduleId: cabinet.id,
+  moduleIndex: 0,
+  name: 'Lateral (Cab 1 base)',
+  qty: 2,
+  width: 562,
+  length: 800,
+  thickness: 18,
+  material: '#FFFFFF',
+  edgeL1: false,
+  edgeL2: false,
+  edgeW1: false,
+  edgeW2: false
+};
+
+const door: Part = {
+  ...lateral,
+  name: 'Puerta Frontal (Cab 1 base)',
+  qty: 1,
+  width: 594,
+  length: 794
+};
+
+const settings = {
+  hardwareBrand: 'Provelcar',
+  assemblyType: 'spax',
+  golaSystem: 'none'
+} as const;
+
+const physical = preparePhysicalCncParts(
+  [lateral, door],
+  [cabinet],
+  settings
+);
+
+// Referencias de prueba, no un mapeo físico certificado.
+const orientation: CncCabinetOrientation = {
+  cabinetId: cabinet.id,
+  doorLeaves: 1,
+  sides: [
+    {
+      role: 'STRUCTURAL_SIDE',
+      sourceBomIndex: 0,
+      physicalUnit: 1,
+      side: 'left',
+      innerFace: 'face_A'
+    },
+    {
+      role: 'STRUCTURAL_SIDE',
+      sourceBomIndex: 0,
+      physicalUnit: 2,
+      side: 'right',
+      innerFace: 'face_B'
+    }
+  ],
+  doors: [
+    {
+      role: 'DOOR_LEAF',
+      sourceBomIndex: 1,
+      physicalUnit: 1,
+      hingeSide: 'left',
+      innerFace: 'face_A'
+    }
+  ]
+};
+
+test('acepta referencias completas para una puerta', () => {
+  assert.doesNotThrow(() =>
+    validateStandardCabinetOrientation(
+      orientation, cabinet, physical
+    )
+  );
+});
+
+test('rechaza laterales incompletos', () => {
+  assert.throws(
+    () => validateStandardCabinetOrientation(
+      {
+        ...orientation,
+        sides: [orientation.sides[0]]
+      },
+      cabinet,
+      physical
+    ),
+    /dos laterales/
+  );
+});
+
+test('rechaza dos laterales con el mismo lado', () => {
+  assert.throws(
+    () => validateStandardCabinetOrientation(
+      {
+        ...orientation,
+        sides: [
+          orientation.sides[0],
+          { ...orientation.sides[1], side: 'left' }
+        ]
+      },
+      cabinet,
+      physical
+    ),
+    /izquierdo o derecho/
+  );
+});
+
+test('rechaza referencias físicas duplicadas', () => {
+  assert.throws(
+    () => validateStandardCabinetOrientation(
+      {
+        ...orientation,
+        sides: [
+          orientation.sides[0],
+          {
+            ...orientation.sides[1],
+            physicalUnit: 1
+          }
+        ]
+      },
+      cabinet,
+      physical
+    ),
+    /duplicada/
+  );
+});
+
+test('rechaza referencias inexistentes', () => {
+  assert.throws(
+    () => validateStandardCabinetOrientation(
+      {
+        ...orientation,
+        doors: [
+          { ...orientation.doors[0], physicalUnit: 9 }
+        ]
+      },
+      cabinet,
+      physical
+    ),
+    /inexistente/
+  );
+});
+
+test('rechaza gabinete incorrecto', () => {
+  assert.throws(
+    () => validateStandardCabinetOrientation(
+      { ...orientation, cabinetId: 'OTRO' },
+      cabinet,
+      physical
+    ),
+    /no coincide/
+  );
+});
+
+test('admite dos puertas con bisagras opuestas', () => {
+  const doubleCabinet: CabinetType = {
+    ...cabinet,
+    variant: '2_doors'
+  };
+
+  const doublePhysical = preparePhysicalCncParts(
+    [lateral, { ...door, qty: 2 }],
+    [doubleCabinet],
+    settings
+  );
+
+  const doubleOrientation: CncCabinetOrientation = {
+    ...orientation,
+    doorLeaves: 2,
+    doors: [
+      orientation.doors[0],
+      {
+        ...orientation.doors[0],
+        physicalUnit: 2,
+        hingeSide: 'right'
+      }
+    ]
+  };
+
+  assert.doesNotThrow(() =>
+    validateStandardCabinetOrientation(
+      doubleOrientation,
+      doubleCabinet,
+      doublePhysical
+    )
+  );
+});
+
+test('rechaza dos puertas con bisagras del mismo lado', () => {
+  const doubleCabinet: CabinetType = {
+    ...cabinet,
+    variant: '2_doors'
+  };
+
+  const doublePhysical = preparePhysicalCncParts(
+    [lateral, { ...door, qty: 2 }],
+    [doubleCabinet],
+    settings
+  );
+
+  assert.throws(
+    () => validateStandardCabinetOrientation(
+      {
+        ...orientation,
+        doorLeaves: 2,
+        doors: [
+          orientation.doors[0],
+          {
+            ...orientation.doors[0],
+            physicalUnit: 2
+          }
+        ]
+      },
+      doubleCabinet,
+      doublePhysical
+    ),
+    /opuestos/
+  );
+});
