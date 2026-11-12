@@ -33,6 +33,10 @@ const lateral: Part = {
   moduleIndex: 0,
   name: 'Lateral (Cab 1 base)',
   qty: 2,
+  physicalUnits: [
+    { unit: 1, role: 'STRUCTURAL_SIDE', side: 'left' },
+    { unit: 2, role: 'STRUCTURAL_SIDE', side: 'right' }
+  ],
   width: 562,
   length: 800,
   thickness: 18,
@@ -45,6 +49,7 @@ const lateral: Part = {
 
 const door: Part = {
   ...lateral,
+  physicalUnits: undefined,
   name: 'Puerta Frontal (Cab 1 base)',
   qty: 1,
   width: 594,
@@ -243,5 +248,39 @@ test('rechaza dos puertas con bisagras del mismo lado', () => {
       doublePhysical
     ),
     /opuestos/
+  );
+});
+
+
+test('rechaza un lado que contradice la identidad BOM', () => {
+  assert.throws(
+    () => validateStandardCabinetOrientation(
+      {
+        ...orientation,
+        sides: [
+          { ...orientation.sides[0], side: 'right' },
+          { ...orientation.sides[1], side: 'left' }
+        ]
+      },
+      cabinet,
+      physical
+    ),
+    /contradice la identidad física BOM/
+  );
+});
+
+test('rechaza laterales sin identidad estructural BOM', () => {
+  const withoutIdentity = physical.map(item => ({
+    ...item,
+    physicalIdentity: undefined
+  }));
+
+  assert.throws(
+    () => validateStandardCabinetOrientation(
+      orientation,
+      cabinet,
+      withoutIdentity
+    ),
+    /Falta identidad estructural/
   );
 });

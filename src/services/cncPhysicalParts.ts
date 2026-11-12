@@ -9,7 +9,8 @@ import type {
 import type {
   Part,
   CabinetType,
-  KitchenHandleConfig
+  KitchenHandleConfig,
+  PartPhysicalUnit
 } from '../types/cncInputs.js';
 
 export interface CncSettings {
@@ -27,6 +28,7 @@ export interface PhysicalCncPart {
   sourceModuleId: string;
   sourceBomIndex: number;
   physicalUnit: number;
+  physicalIdentity?: PartPhysicalUnit;
   originalPartCode: string;
   cnc: CncMachinedPart;
 }
@@ -69,6 +71,47 @@ export function preparePhysicalCncParts(
       throw new Error(`Pieza BOM inválida: ${index}`);
     }
 
+    const identities = new Map<number, PartPhysicalUnit>();
+
+    if (part.physicalUnits !== undefined) {
+      if (
+        !Array.isArray(part.physicalUnits) ||
+        part.physicalUnits.length !== part.qty
+      ) {
+        throw new Error(
+          `Identidades físicas incompletas: ${index}`
+        );
+      }
+
+      for (const identity of part.physicalUnits) {
+        if (
+          !identity ||
+          !Number.isSafeInteger(identity.unit) ||
+          identity.unit < 1 ||
+          identity.unit > part.qty ||
+          identity.role !== 'STRUCTURAL_SIDE' ||
+          (identity.side !== 'left' && identity.side !== 'right') ||
+          identities.has(identity.unit)
+        ) {
+          throw new Error(
+            `Identidad física inválida: ${index}`
+          );
+        }
+
+        identities.set(identity.unit, identity);
+      }
+
+      const sides = [...identities.values()].map(
+        identity => identity.side
+      );
+
+      if (new Set(sides).size !== sides.length) {
+        throw new Error(
+          `Lados físicos duplicados: ${index}`
+        );
+      }
+    }
+
     const cabinet = cabinetsById.get(part.moduleId);
 
     if (!cabinet) {
@@ -104,6 +147,7 @@ export function preparePhysicalCncParts(
         sourceModuleId: part.moduleId,
         sourceBomIndex: index,
         physicalUnit: unit,
+        physicalIdentity: identities.get(unit),
         originalPartCode,
         cnc: {
           ...machined,

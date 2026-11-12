@@ -51,14 +51,17 @@ export function validateStandardCabinetOrientation(
     throw new Error('Se requieren dos laterales físicos');
   }
 
-  const physicalKeys = new Set(
+  const physicalByKey = new Map(
     physicalParts
       .filter(part => part.sourceModuleId === cabinet.id)
-      .map(part => referenceKey(
-        part.sourceModuleId,
-        part.sourceBomIndex,
-        part.physicalUnit
-      ))
+      .map(part => [
+        referenceKey(
+          part.sourceModuleId,
+          part.sourceBomIndex,
+          part.physicalUnit
+        ),
+        part
+      ] as const)
   );
 
   const usedReferences = new Set<string>();
@@ -83,7 +86,7 @@ export function validateStandardCabinetOrientation(
       ref.physicalUnit
     );
 
-    if (!physicalKeys.has(key)) {
+    if (!physicalByKey.has(key)) {
       throw new Error('Referencia física inexistente');
     }
 
@@ -94,6 +97,11 @@ export function validateStandardCabinetOrientation(
     usedReferences.add(key);
   }
 
+  // Detectar lados duplicados antes de comparar con BOM.
+  if (orientation.sides[0].side === orientation.sides[1].side) {
+    throw new Error('Falta lateral izquierdo o derecho');
+  }
+
   const sides = orientation.sides.map(side => {
     if (
       side.role !== 'STRUCTURAL_SIDE' ||
@@ -101,6 +109,32 @@ export function validateStandardCabinetOrientation(
     ) {
       throw new Error('Rol o lado estructural inválido');
     }
+    const source = physicalByKey.get(
+      referenceKey(
+        cabinet.id,
+        side.sourceBomIndex,
+        side.physicalUnit
+      )
+    );
+
+    if (
+      !source?.physicalIdentity ||
+      source.physicalIdentity.role !== 'STRUCTURAL_SIDE'
+    ) {
+      throw new Error(
+        'Falta identidad estructural verificada por BOM'
+      );
+    }
+
+    if (
+      source.physicalIdentity.unit !== side.physicalUnit ||
+      source.physicalIdentity.side !== side.side
+    ) {
+      throw new Error(
+        'El lado declarado contradice la identidad física BOM'
+      );
+    }
+
     return side.side;
   });
 
