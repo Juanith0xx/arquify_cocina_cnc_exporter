@@ -145,7 +145,13 @@
       "edgeW2": true,
       "notes": "Puerta batiente",
       "materialCategory": "doors",
-      "isHpl": false
+      "isHpl": false,
+      "physicalUnits": [
+        {
+          "unit": 1,
+          "role": "DOOR_LEAF"
+        }
+      ]
     }
   ],
   "cabinets": [

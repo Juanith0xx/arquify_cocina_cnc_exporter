@@ -89,8 +89,11 @@ export function preparePhysicalCncParts(
           !Number.isSafeInteger(identity.unit) ||
           identity.unit < 1 ||
           identity.unit > part.qty ||
-          identity.role !== 'STRUCTURAL_SIDE' ||
-          (identity.side !== 'left' && identity.side !== 'right') ||
+          !(
+            (identity.role === 'STRUCTURAL_SIDE' &&
+              (identity.side === 'left' || identity.side === 'right')) ||
+            (identity.role === 'DOOR_LEAF' && identity.side === undefined)
+          ) ||
           identities.has(identity.unit)
         ) {
           throw new Error(
@@ -101,9 +104,9 @@ export function preparePhysicalCncParts(
         identities.set(identity.unit, identity);
       }
 
-      const sides = [...identities.values()].map(
-        identity => identity.side
-      );
+      const sides = [...identities.values()]
+        .filter(identity => identity.role === 'STRUCTURAL_SIDE')
+        .map(identity => identity.side);
 
       if (new Set(sides).size !== sides.length) {
         throw new Error(

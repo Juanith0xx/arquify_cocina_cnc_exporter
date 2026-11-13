@@ -50,7 +50,7 @@ const lateral: Part = {
 
 const door: Part = {
   ...lateral,
-  physicalUnits: undefined,
+  physicalUnits: [{ unit: 1, role: 'DOOR_LEAF' }],
   name: 'Puerta Frontal (Cab 1 base)',
   qty: 1,
   width: 594,
@@ -193,7 +193,17 @@ test('admite dos puertas con bisagras opuestas', () => {
   };
 
   const doublePhysical = preparePhysicalCncParts(
-    [lateral, { ...door, qty: 2 }],
+    [
+      lateral,
+      {
+        ...door,
+        qty: 2,
+        physicalUnits: [
+          { unit: 1, role: 'DOOR_LEAF' },
+          { unit: 2, role: 'DOOR_LEAF' }
+        ]
+      }
+    ],
     [doubleCabinet],
     settings
   );
@@ -227,7 +237,17 @@ test('rechaza dos puertas con bisagras del mismo lado', () => {
   };
 
   const doublePhysical = preparePhysicalCncParts(
-    [lateral, { ...door, qty: 2 }],
+    [
+      lateral,
+      {
+        ...door,
+        qty: 2,
+        physicalUnits: [
+          { unit: 1, role: 'DOOR_LEAF' },
+          { unit: 2, role: 'DOOR_LEAF' }
+        ]
+      }
+    ],
     [doubleCabinet],
     settings
   );

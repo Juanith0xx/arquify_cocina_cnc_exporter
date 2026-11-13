@@ -153,6 +153,24 @@ export function validateStandardCabinetOrientation(
     ) {
       throw new Error('Orientación de puerta inválida');
     }
+
+    const source = physicalByKey.get(
+      referenceKey(
+        cabinet.id,
+        door.sourceBomIndex,
+        door.physicalUnit
+      )
+    );
+
+    if (
+      source?.physicalIdentity?.role !== 'DOOR_LEAF' ||
+      source.physicalIdentity.unit !== door.physicalUnit
+    ) {
+      throw new Error(
+        'Falta identidad de hoja de puerta verificada por BOM'
+      );
+    }
+
     return door.hingeSide;
   });
 
